@@ -1,4 +1,3 @@
-#include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -26,7 +25,7 @@ int main(int argc, char* argv[]) {
 	int rc = getaddrinfo(argv[1], argv[2], &hints, &result);
 
 	if (rc != 0) {
-        fprintf(stderr, "Address info failure \n", argv[0]);
+        fprintf(stderr, "Address info failure \n");
         exit(EXIT_FAILURE);
 	}
 
@@ -34,7 +33,7 @@ int main(int argc, char* argv[]) {
 	rc = bind(sd, result->ai_addr, result->ai_addrlen);
 
 	if (rc == -1) {
-        fprintf(stderr, "Binding failure \n", argv[0]);
+        fprintf(stderr, "Binding failure \n");
         exit(EXIT_FAILURE);
 	}
 
@@ -43,17 +42,16 @@ int main(int argc, char* argv[]) {
 	while (true) {
 		char host[NI_MAXHOST];
 		char serv[NI_MAXSERV];
-		struct sockaddr client; //vale para ipv4 y ipv6
+		struct sockaddr client;
 		socklen_t  clientlen = sizeof(struct sockaddr);
 		int client_sd = accept(sd, (struct sockaddr*)&client, &clientlen);
 		getnameinfo((struct sockaddr*)&client, clientlen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
         printf("Conexión desde: %s [ %s ]\n", host, serv);
 
-
-		while (true) {
+		while (1) {
 			char buffer[1500];
 			ssize_t bytes = recv(client_sd, buffer, 1499, 0);
-			if (bytes == 0) {
+			if (bytes == 0 || (buffer[0] == 'Q' && strlen(buffer) <= 2)) {
 				printf("Conexión terminada\n");
 				break;
 			}
