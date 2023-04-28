@@ -9,6 +9,9 @@
 #include <stdexcept>
 
 #include <ostream>
+#include <unistd.h>
+
+using namespace std;
 
 // -----------------------------------------------------------------------------
 // Definiciones adelantadas
