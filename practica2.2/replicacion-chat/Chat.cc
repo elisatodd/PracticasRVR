@@ -5,24 +5,22 @@
 
 void ChatMessage::to_bin()
 {
-     alloc_data(MESSAGE_SIZE);
+    alloc_data(MESSAGE_SIZE);
 
     memset(_data, 0, MESSAGE_SIZE);
 
     //Serializar los campos type, nick y message en el buffer _data
-    char* tmp=_data;
-    memcpy(_data, &type, sizeof(uint8_t));
-    tmp += nick.length() + 1;
-    memcpy(_data, nick.c_str(), sizeof(char)*8);
-    tmp += nick.length() + 1;
-    memcpy(_data, message.c_str(), sizeof(char)*80);
+    char* tmp = _data;
+    memcpy(tmp, &type, sizeof(uint8_t));
+    tmp += sizeof(uint8_t);
+    memcpy(tmp, nick.c_str(), sizeof(char)*8);
+    tmp += sizeof(char)*8;
+    memcpy(tmp, message.c_str(), sizeof(char)*80);
+    tmp += sizeof(char)*80;
 }
 
 int ChatMessage::from_bin(char * bobj)
 {
-    alloc_data(MESSAGE_SIZE);
-
-    memcpy(static_cast<void *>(_data), bobj, MESSAGE_SIZE);
 
     //Reconstruir la clase usando el buffer _data
     // Copiar los datos del buffer al objeto ChatMessage
@@ -41,7 +39,7 @@ int ChatMessage::from_bin(char * bobj)
 
     // Copiar el campo message
     char message_buffer[81];
-    memcpy(message_buffer, tmp, sizeof(char) * 80);
+    memcpy(message_buffer, tmp, sizeof(char) * 81);
     message_buffer[80] = '\0'; // asegurar que la cadena está terminada
     message = std::string(message_buffer);
 
@@ -67,6 +65,7 @@ void ChatServer::do_messages()
         // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
         Socket* clientSd;
         ChatMessage msg;
+        
         //Recibir Mensajes en y en función del tipo de mensaje
         socket.recv(msg, clientSd);
 

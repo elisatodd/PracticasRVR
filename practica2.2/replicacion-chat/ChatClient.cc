@@ -1,14 +1,26 @@
-#include <thread>
 #include "Chat.h"
+#include <iostream>
+#include <thread>
 
 int main(int argc, char **argv)
 {
-    ChatClient ec(argv[1], argv[2], argv[3]);
+    if (argc != 4)
+    {
+        std::cerr << "Usage: " << argv[0] << " <server> <port> <nick>" << std::endl;
+        return 1;
+    }
 
-    std::thread net_thread([&ec](){ ec.net_thread(); });
+    ChatClient client(argv[1], argv[2], argv[3]);
 
-    ec.login();
+    client.login();
 
-    ec.input_thread();
+    std::thread t_input(&ChatClient::input_thread, &client);
+    std::thread t_net(&ChatClient::net_thread, &client);
+
+    t_input.join();
+    t_net.join();
+
+    client.logout();
+    
+    return 0;
 }
-
